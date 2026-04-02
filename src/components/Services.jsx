@@ -63,7 +63,7 @@ export default function Services() {
     <section
       ref={sectionRef}
       id="services"
-      className="relative py-28 md:py-36 overflow-hidden"
+      className="relative py-16 md:py-20 overflow-hidden"
       style={{ backgroundColor: '#0B0B0B' }}
     >
       {/* Top border */}
