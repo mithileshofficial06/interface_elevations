@@ -5,6 +5,8 @@ import Services from '@/components/Services';
 import WhyChooseUs from '@/components/WhyChooseUs';
 import ProjectsHorizontal from '@/components/ProjectsHorizontal';
 import Clients from '@/components/Clients';
+import Contact from '@/components/ContactForm';
+import Footer from '@/components/Footer';
 
 export default function Home() {
   return (
@@ -16,7 +18,9 @@ export default function Home() {
         <WhyChooseUs />
         <ProjectsHorizontal />
         <Clients />
+        <Contact />
       </main>
+      <Footer />
     </IntroAnimation>
   );
 }

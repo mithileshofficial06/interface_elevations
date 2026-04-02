@@ -24,6 +24,9 @@ export default function IntroAnimation({ children }) {
   const transitionFired = useRef(false);
   const contentRef = useRef(null);
   const [activeIndex, setActiveIndex] = useState(0);
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const mobileMenuRef = useRef(null);
+  const mobileLinksRef = useRef([]);
 
   const moveHighlight = useCallback((index) => {
     if (!navLinksRef.current || !highlightRef.current) return;
@@ -308,13 +311,76 @@ export default function IntroAnimation({ children }) {
             ))}
           </div>
 
-          <button className="md:hidden text-white p-2" aria-label="Menu">
+          <button
+            className="md:hidden text-white p-2 relative z-[300]"
+            aria-label="Menu"
+            onClick={() => {
+              setMobileOpen(true);
+              document.body.style.overflow = 'hidden';
+              setTimeout(() => {
+                if (mobileMenuRef.current) {
+                  gsap.fromTo(mobileMenuRef.current, { opacity: 0 }, { opacity: 1, duration: 0.3, ease: 'power2.out' });
+                }
+                mobileLinksRef.current.forEach((el, i) => {
+                  if (!el) return;
+                  gsap.fromTo(el, { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.5, delay: i * 0.08, ease: 'power3.out' });
+                });
+              }, 10);
+            }}
+          >
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
             </svg>
           </button>
         </div>
       </nav>
+
+      {/* MOBILE MENU OVERLAY */}
+      {mobileOpen && (
+        <div
+          ref={mobileMenuRef}
+          className="fixed inset-0 z-[250] flex flex-col items-center justify-center"
+          style={{ opacity: 0, backgroundColor: 'rgba(11,11,11,0.97)', backdropFilter: 'blur(10px)' }}
+        >
+          {/* Close button */}
+          <button
+            className="absolute top-5 right-5 w-10 h-10 flex items-center justify-center text-white hover:text-primary transition-colors cursor-pointer"
+            onClick={() => {
+              gsap.to(mobileMenuRef.current, {
+                opacity: 0, duration: 0.25, ease: 'power2.in',
+                onComplete: () => { setMobileOpen(false); document.body.style.overflow = ''; },
+              });
+            }}
+            aria-label="Close menu"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" className="w-7 h-7">
+              <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+            </svg>
+          </button>
+
+          {/* Nav links */}
+          <nav className="flex flex-col items-center gap-8">
+            {NAV_LINKS.map((link, i) => (
+              <a
+                key={link.label}
+                ref={el => mobileLinksRef.current[i] = el}
+                href={link.href}
+                onClick={() => {
+                  gsap.to(mobileMenuRef.current, {
+                    opacity: 0, duration: 0.25, ease: 'power2.in',
+                    onComplete: () => { setMobileOpen(false); document.body.style.overflow = ''; },
+                  });
+                  handleNavClick(i);
+                }}
+                className="font-heading font-bold text-3xl md:text-4xl tracking-[0.2em] uppercase text-primary hover:text-white transition-colors duration-300"
+                style={{ opacity: 0 }}
+              >
+                {link.label}
+              </a>
+            ))}
+          </nav>
+        </div>
+      )}
 
       {/* INTRO OVERLAY (centered logo) */}
       <div
