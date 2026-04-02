@@ -233,6 +233,32 @@ export default function IntroAnimation({ children }) {
     };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // Track active section on scroll and update navbar highlight
+  useEffect(() => {
+    const sectionIds = NAV_LINKS.map((l) => l.href.replace('#', ''));
+
+    const onScroll = () => {
+      if (!transitionFired.current) return;
+      const scrollY = window.scrollY + 120; // offset for navbar height
+
+      let currentIndex = 0;
+      sectionIds.forEach((id, i) => {
+        const el = document.getElementById(id);
+        if (el && el.offsetTop <= scrollY) {
+          currentIndex = i;
+        }
+      });
+
+      if (currentIndex !== activeIndex) {
+        setActiveIndex(currentIndex);
+        moveHighlight(currentIndex);
+      }
+    };
+
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, [activeIndex, moveHighlight]);
+
   return (
     <div ref={wrapperRef} className="relative">
       {/* FIXED NAVBAR (hidden initially) */}
