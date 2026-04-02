@@ -7,6 +7,7 @@ const STATS = [
   { number: 27, prefix: '+', label: 'Years of Experience' },
   { number: 450, prefix: '+', label: 'Projects' },
   { number: 12, prefix: '+', label: 'States in India' },
+  { number: 200, prefix: '+', label: 'Workers' },
 ];
 
 export default function Hero() {
@@ -112,7 +113,7 @@ export default function Hero() {
         {/* Stats Boxes */}
         <div
           ref={statsRef}
-          className="mt-14 md:mt-20 grid grid-cols-1 sm:grid-cols-3 gap-6 md:gap-10 w-full max-w-4xl"
+          className="mt-14 md:mt-20 grid grid-cols-2 sm:grid-cols-4 gap-6 md:gap-8 w-full max-w-5xl"
         >
           {STATS.map((stat, i) => (
             <div
