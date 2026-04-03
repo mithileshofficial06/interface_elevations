@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -14,6 +14,19 @@ export default function About() {
   const imageWrapRef = useRef(null);
   const textItemRefs = useRef([]);
   const labelRef = useRef(null);
+
+  const PROFILE_IMAGES = [
+    '/images/profile/download.jpeg',
+    '/images/profile/download1.png',
+  ];
+  const [currentPic, setCurrentPic] = useState(0);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentPic(prev => (prev + 1) % PROFILE_IMAGES.length);
+    }, 6000); // 6 seconds for each photo
+    return () => clearInterval(timer);
+  }, []);
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -103,12 +116,20 @@ export default function About() {
           {/* Founder Image — wider 6-col (#4 left slide-in) */}
           <div ref={imageRef} className="md:col-span-6 flex flex-col items-start will-change-transform" style={{ opacity: 0 }}>
             <div ref={imageWrapRef} className="relative border border-primary/40 p-2 rounded-sm w-full will-change-transform aspect-[3/4]">
-              <Image
-                src="/images/profile/download.jpeg"
-                alt="M. P. Ganeshan - Founder"
-                fill
-                className="object-cover rounded-sm"
-              />
+              {PROFILE_IMAGES.map((src, idx) => (
+                <div
+                  key={src}
+                  className="absolute inset-0 transition-opacity duration-1000 ease-in-out"
+                  style={{ opacity: currentPic === idx ? 1 : 0 }}
+                >
+                  <Image
+                    src={src}
+                    alt={`M. P. Ganeshan - Founder ${idx + 1}`}
+                    fill
+                    className="object-cover rounded-sm"
+                  />
+                </div>
+              ))}
               <div className="absolute top-0 left-0 w-6 h-6 border-t-2 border-l-2 border-primary" />
               <div className="absolute top-0 right-0 w-6 h-6 border-t-2 border-r-2 border-primary" />
               <div className="absolute bottom-0 left-0 w-6 h-6 border-b-2 border-l-2 border-primary" />
