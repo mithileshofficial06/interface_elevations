@@ -1,22 +1,41 @@
 import '@/styles/globals.css';
 
 export const metadata = {
-  title: 'INTERFACE ELEVATION & SIGNS | Premium Elevation & Signage Solutions',
+  title: 'Interface Elevation & Signs | Premium Facade & Signage Solutions, Chennai',
   description:
-    'With 27+ years of expertise, Interface Elevation & Signs delivers world-class elevation and signage solutions for commercial and industrial projects.',
+    '27+ years of expertise in facade elevation, structural glazing, ACP cladding, LED displays and signage across India. Based in Chennai, serving Pan-India.',
   keywords: [
-    'elevation',
-    'signage',
+    'facade elevation Chennai',
+    'signage solutions India',
     'ACP cladding',
-    'glass work',
-    'industrial signs',
+    'structural glazing',
+    'LED display installation',
     'building elevation',
-    'construction',
+    'industrial signs',
+    'HPL cladding',
+    'glass elevation',
+    'construction signage',
   ],
+  metadataBase: new URL('https://interfaceelevationsandsigns.com'),
+  alternates: {
+    canonical: '/',
+  },
   openGraph: {
-    title: 'INTERFACE ELEVATION & SIGNS',
-    description: '27+ Years of Expertise in Elevation & Signage Solutions',
+    title: 'Interface Elevation & Signs | Premium Facade & Signage Solutions',
+    description: '27+ years of expertise in facade elevation, structural glazing, ACP cladding, LED displays and signage across India.',
     type: 'website',
+    url: 'https://interfaceelevationsandsigns.com',
+    siteName: 'Interface Elevation & Signs',
+    locale: 'en_IN',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Interface Elevation & Signs | Premium Facade & Signage Solutions',
+    description: '27+ years of expertise in facade elevation, structural glazing, ACP cladding, and signage across India.',
+  },
+  robots: {
+    index: true,
+    follow: true,
   },
 };
 

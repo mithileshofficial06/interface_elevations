@@ -222,6 +222,7 @@ export default function Hero() {
     const runCounter = (el) => {
       const targetVal = parseFloat(el.getAttribute('data-target'));
       const prefix = el.getAttribute('data-prefix') || '';
+      el.textContent = '0'; // Reset to 0 before counting up
       let startTime = null;
       const duration = 2000;
       const easeOut = t => 1 - Math.pow(1 - t, 3);
@@ -321,7 +322,7 @@ export default function Hero() {
             {/* Section label with letter-spacing animation */}
             <div ref={labelRef} style={{ opacity: 0 }}>
               <span className="text-primary font-heading font-bold text-xs tracking-[0.25em] uppercase mb-2 inline-block">
-                Cover to Ever
+                End-to-End Facade Solutions
               </span>
             </div>
 
@@ -555,7 +556,7 @@ export default function Hero() {
                 data-prefix={stat.prefix}
                 className="text-primary font-heading font-extrabold text-3xl md:text-4xl lg:text-5xl border-transparent"
               >
-                0
+                {stat.prefix}{stat.number}
               </span>
             </div>
           ))}
