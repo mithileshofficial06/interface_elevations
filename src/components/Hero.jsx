@@ -393,46 +393,56 @@ export default function Hero() {
 
                 // Determine position: current slide in view, previous exiting, rest hidden
                 let translateX = '100%'; // default: off-screen right
-                let opacity = 0;
-                let zIndex = 0;
+                let visibility = 'hidden';
 
                 if (i === currentSlide) {
                   translateX = '0%';
                   opacity = 1;
                   zIndex = 2;
+                  visibility = 'visible';
                 } else if (i === prevSlide) {
                   // Previous slide exits opposite direction
                   translateX = slideDirection === 'next' ? '-100%' : '100%';
                   opacity = 1;
                   zIndex = 1;
+                  visibility = 'visible';
                 } else {
                   // Hidden slides positioned off-screen in entry direction
                   translateX = slideDirection === 'next' ? '100%' : '-100%';
                   opacity = 0;
                   zIndex = 0;
+                  visibility = 'hidden';
                 }
+
+                // Optimization: only render Next Image if it's visible or adjacent (to avoid 20 unoptimized images loading instantly)
+                const isAdjacent = i === (currentSlide + 1) % HERO_IMAGES.length || i === (currentSlide - 1 + HERO_IMAGES.length) % HERO_IMAGES.length;
+                const shouldRenderImage = visibility === 'visible' || isAdjacent || i === 0;
 
                 return (
                   <div
                     key={src}
                     className="absolute inset-0"
                     style={{
-                      transform: `translateX(${translateX})`,
+                      transform: `translate3d(${translateX}, 0, 0)`,
                       opacity,
                       zIndex,
+                      visibility,
+                      willChange: i === currentSlide || i === prevSlide ? 'transform, opacity' : 'auto',
                       transition: i === currentSlide || i === prevSlide
                         ? 'transform 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.7s ease'
                         : 'none',
                     }}
                   >
-                    <Image
-                      src={encoded}
-                      alt={`Project showcase ${i + 1}`}
-                      fill
-                      className="object-cover"
-                      priority={i === 0}
-                      sizes="(max-width: 1024px) 100vw, 50vw"
-                    />
+                    {shouldRenderImage && (
+                      <Image
+                        src={encoded}
+                        alt={`Project showcase ${i + 1}`}
+                        fill
+                        className="object-cover"
+                        priority={i === 0}
+                        sizes="(max-width: 1024px) 100vw, 50vw"
+                      />
+                    )}
                   </div>
                 );
               })}

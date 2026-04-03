@@ -380,17 +380,16 @@ export default function IntroAnimation({ children }) {
     // Animation loop
     let animId;
     const animate = () => {
-      // Dot follows closely (0.1s lag)
+      // Dot follows closely
       dotPos.current.x += (mousePos.current.x - dotPos.current.x) * 0.15;
       dotPos.current.y += (mousePos.current.y - dotPos.current.y) * 0.15;
-      dot.style.left = dotPos.current.x + 'px';
-      dot.style.top = dotPos.current.y + 'px';
-
-      // Ring follows with more lag (0.2s lag)
+      // Ring follows with more lag
       ringPos.current.x += (mousePos.current.x - ringPos.current.x) * 0.08;
       ringPos.current.y += (mousePos.current.y - ringPos.current.y) * 0.08;
-      ring.style.left = ringPos.current.x + 'px';
-      ring.style.top = ringPos.current.y + 'px';
+
+      // Use translate3d for hardware acceleration instead of left/top
+      dot.style.transform = `translate3d(calc(${dotPos.current.x}px - 50%), calc(${dotPos.current.y}px - 50%), 0)`;
+      ring.style.transform = `translate3d(calc(${ringPos.current.x}px - 50%), calc(${ringPos.current.y}px - 50%), 0)`;
 
       animId = requestAnimationFrame(animate);
     };
