@@ -136,6 +136,77 @@
   transition: transform 0.3s ease;
 }
 
+/* ===== CLIENTS BLUEPRINT GRID (always-on) ===== */
+@keyframes blueprintDriftFine {
+  0%   { transform: translateY(0); }
+  100% { transform: translateY(33.33%); }
+}
+@keyframes blueprintDriftThick {
+  0%   { transform: translateY(0); }
+  100% { transform: translateY(33.33%); }
+}
+
+.clients-blueprint-fine {
+  background-image:
+    linear-gradient(rgba(244, 161, 3, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(244, 161, 3, 0.04) 1px, transparent 1px);
+  background-size: 40px 40px;
+  animation: blueprintDriftFine 25s linear infinite;
+}
+
+.clients-blueprint-thick {
+  background-image:
+    linear-gradient(rgba(244, 161, 3, 0.07) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(244, 161, 3, 0.07) 1px, transparent 1px);
+  background-size: 200px 200px;
+  animation: blueprintDriftThick 40s linear infinite;
+}
+
+/* ── Crosshair measurement lines ── */
+@keyframes measureExpandH {
+  0%, 100% { width: 0; opacity: 0; }
+  10%      { width: 0; opacity: 0.6; }
+  50%      { width: 60px; opacity: 0.4; }
+  90%      { width: 60px; opacity: 0.1; }
+}
+@keyframes measureExpandV {
+  0%, 100% { height: 0; opacity: 0; }
+  10%      { height: 0; opacity: 0.6; }
+  50%      { height: 60px; opacity: 0.4; }
+  90%      { height: 60px; opacity: 0.1; }
+}
+
+.clients-measure-h {
+  animation: measureExpandH 5s ease-in-out infinite;
+}
+
+.clients-measure-v {
+  animation: measureExpandV 5s ease-in-out infinite;
+}
+
+/* ── Pulsing junction node ── */
+@keyframes nodePulse {
+  0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.3; }
+  50%      { transform: translate(-50%, -50%) scale(2.5); opacity: 0.7; box-shadow: 0 0 8px rgba(244, 161, 3, 0.4); }
+}
+
+.clients-node-pulse {
+  animation: nodePulse 4s ease-in-out infinite;
+}
+
+/* ── Reduced motion ── */
+@media (prefers-reduced-motion: reduce) {
+  .clients-blueprint-fine,
+  .clients-blueprint-thick {
+    animation: none;
+  }
+  .clients-measure-h,
+  .clients-measure-v,
+  .clients-node-pulse {
+    animation: none;
+  }
+}
+
 /* ===== CONTACT CARD HOVER ===== */
 .contact-info-card {
   will-change: transform;

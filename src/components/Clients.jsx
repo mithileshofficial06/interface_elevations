@@ -4,6 +4,7 @@ import Image from 'next/image';
 import { useEffect, useRef, forwardRef } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import GoldParticles, { BlueprintGrid } from './GoldParticles';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -55,7 +56,6 @@ const BrandCard = forwardRef(function BrandCard({ src }, ref) {
     </div>
   );
 });
-
 
 
 export default function Clients() {
@@ -113,8 +113,12 @@ export default function Clients() {
         <div className="section-divider" />
       </div>
 
-      {/* Glow */}
-      <div className="absolute pointer-events-none" style={{ left: '50%', top: '50%', transform: 'translate(-50%,-50%)', width: '600px', height: '600px', background: 'radial-gradient(circle, rgba(244,161,3,0.04) 0%, transparent 70%)' }} />
+      {/* ═══ ANIMATED BLUEPRINT GRID + GOLD PARTICLES ═══ */}
+      <BlueprintGrid nodeCount={6} />
+      <GoldParticles count={50} opacity={0.8} />
+
+      {/* Center glow */}
+      <div className="absolute pointer-events-none z-[2]" style={{ left: '50%', top: '50%', transform: 'translate(-50%,-50%)', width: '700px', height: '700px', background: 'radial-gradient(circle, rgba(244,161,3,0.05) 0%, transparent 70%)' }} />
 
       <div className="relative z-10 max-w-container mx-auto px-6">
         {/* Heading */}
@@ -147,7 +151,6 @@ export default function Clients() {
             ))}
           </div>
         </div>
-
 
       </div>
     </section>
