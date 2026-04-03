@@ -394,6 +394,8 @@ export default function Hero() {
                 // Determine position: current slide in view, previous exiting, rest hidden
                 let translateX = '100%'; // default: off-screen right
                 let visibility = 'hidden';
+                let opacity = 0;
+                let zIndex = 0;
 
                 if (i === currentSlide) {
                   translateX = '0%';
