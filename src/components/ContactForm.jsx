@@ -7,12 +7,16 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 gsap.registerPlugin(ScrollTrigger);
 
 /* ─── Booking Modal ─── */
+const SHEET_URL = process.env.NEXT_PUBLIC_GOOGLE_SHEET_URL || '';
+
 function BookingModal({ isOpen, onClose }) {
   const overlayRef = useRef(null);
   const formRef = useRef(null);
   const [formData, setFormData] = useState({ name: '', phone: '', email: '', service: '', location: '', message: '' });
   const [showSuccess, setShowSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState({});
+  const [submitError, setSubmitError] = useState('');
 
   useEffect(() => {
     if (isOpen) {
@@ -26,30 +30,69 @@ function BookingModal({ isOpen, onClose }) {
   const handleClose = () => {
     gsap.to(formRef.current, { opacity: 0, y: 30, scale: 0.95, duration: 0.25, ease: 'power2.in' });
     gsap.to(overlayRef.current, { opacity: 0, duration: 0.3, delay: 0.1, ease: 'power2.in', onComplete: () => {
-      setShowSuccess(false); setLoading(false);
+      setShowSuccess(false); setLoading(false); setErrors({}); setSubmitError('');
       setFormData({ name: '', phone: '', email: '', service: '', location: '', message: '' });
       onClose();
     }});
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setSubmitError('');
+
+    // Field validation
+    const newErrors = {};
+    if (!formData.name.trim()) newErrors.name = 'Full name is required';
+    if (!formData.phone.trim()) newErrors.phone = 'Phone number is required';
+    if (!formData.email.trim()) newErrors.email = 'Email is required';
+    if (!formData.service) newErrors.service = 'Please select a service';
+    if (!formData.location.trim()) newErrors.location = 'Location is required';
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
+    setErrors({});
     setLoading(true);
-    // Simulate API call
-    setTimeout(() => {
+
+    try {
+      await fetch(SHEET_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: formData.name,
+          phone: formData.phone,
+          email: formData.email,
+          service: formData.service,
+          location: formData.location,
+          message: formData.message,
+        }),
+      });
+
+      // Show success (no-cors always resolves as opaque, so we treat it as success)
       gsap.to(formRef.current, { opacity: 0, scale: 0.95, duration: 0.3, ease: 'power2.in', onComplete: () => {
         setLoading(false);
         setShowSuccess(true);
         gsap.fromTo(formRef.current, { opacity: 0, scale: 0.9 }, { opacity: 1, scale: 1, duration: 0.5, ease: 'back.out(1.7)' });
       }});
-    }, 1200);
+    } catch (error) {
+      setLoading(false);
+      setSubmitError('Something went wrong. Please try again.');
+    }
   };
 
-  const handleChange = (e) => setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
+  const handleChange = (e) => {
+    setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
+    // Clear field error on change
+    if (errors[e.target.name]) {
+      setErrors(prev => ({ ...prev, [e.target.name]: '' }));
+    }
+  };
 
   if (!isOpen) return null;
 
-  const inputStyle = { background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(244,161,3,0.2)', color: '#fff', outline: 'none', transition: 'border-color 0.3s' };
+  const inputStyle = { background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(244,161,3,0.2)', color: '#fff', outline: 'none', transition: 'border-color 0.3s ease, box-shadow 0.3s ease' };
   const selectStyle = { ...inputStyle, WebkitAppearance: 'none', MozAppearance: 'none', appearance: 'none',
     backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23F4A103' stroke-width='2' stroke-linecap='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E")`,
     backgroundRepeat: 'no-repeat', backgroundPosition: 'right 14px center' };
@@ -60,7 +103,7 @@ function BookingModal({ isOpen, onClose }) {
       onClick={(e) => { if (e.target === overlayRef.current) handleClose(); }}>
       <div className="min-h-full flex items-center justify-center px-4 py-8">
         <div ref={formRef} className="relative w-full max-w-lg"
-          style={{ background: 'linear-gradient(160deg, #1A1A1A, #111111)', border: '1px solid rgba(244,161,3,0.2)', boxShadow: '0 0 60px rgba(244,161,3,0.1), 0 25px 50px rgba(0,0,0,0.5)', opacity: 0 }}>
+          style={{ background: 'linear-gradient(160deg, #1A1A1A, #111111)', border: '1px solid rgba(212,160,23,0.4)', boxShadow: '0 0 60px rgba(244,161,3,0.1), 0 25px 50px rgba(0,0,0,0.5)', opacity: 0 }}>
 
           <div className="absolute top-0 left-0 right-0 h-[3px]" style={{ background: 'linear-gradient(90deg, transparent, #F4A103, transparent)' }} />
 
@@ -76,18 +119,21 @@ function BookingModal({ isOpen, onClose }) {
                   <p className="font-body text-sm text-text-secondary">Fill in your details and our team will get back to you shortly.</p>
                 </div>
 
-                <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+                <form onSubmit={handleSubmit} className="flex flex-col gap-4" noValidate>
                   <div><label className="block font-heading text-xs tracking-[0.15em] uppercase text-text-muted mb-2">Full Name <span className="text-primary">*</span></label>
-                    <input type="text" name="name" required value={formData.name} onChange={handleChange} placeholder="Your full name" className="w-full px-4 py-3 font-body text-sm placeholder-text-muted focus:border-primary" style={inputStyle} /></div>
+                    <input type="text" name="name" value={formData.name} onChange={handleChange} placeholder="Your full name" className="form-input-enhanced w-full px-4 py-3 font-body text-sm placeholder-text-muted" style={{ ...inputStyle, ...(errors.name ? { borderColor: '#ef4444' } : {}) }} />
+                    {errors.name && <p className="text-[#ef4444] text-xs mt-1 font-body">{errors.name}</p>}</div>
 
                   <div><label className="block font-heading text-xs tracking-[0.15em] uppercase text-text-muted mb-2">Phone Number <span className="text-primary">*</span></label>
-                    <input type="tel" name="phone" required value={formData.phone} onChange={handleChange} placeholder="Your phone number" className="w-full px-4 py-3 font-body text-sm placeholder-text-muted focus:border-primary" style={inputStyle} /></div>
+                    <input type="tel" name="phone" value={formData.phone} onChange={handleChange} placeholder="Your phone number" className="form-input-enhanced w-full px-4 py-3 font-body text-sm placeholder-text-muted" style={{ ...inputStyle, ...(errors.phone ? { borderColor: '#ef4444' } : {}) }} />
+                    {errors.phone && <p className="text-[#ef4444] text-xs mt-1 font-body">{errors.phone}</p>}</div>
 
                   <div><label className="block font-heading text-xs tracking-[0.15em] uppercase text-text-muted mb-2">Email Address <span className="text-primary">*</span></label>
-                    <input type="email" name="email" required value={formData.email} onChange={handleChange} placeholder="Your email address" className="w-full px-4 py-3 font-body text-sm placeholder-text-muted focus:border-primary" style={inputStyle} /></div>
+                    <input type="email" name="email" value={formData.email} onChange={handleChange} placeholder="Your email address" className="form-input-enhanced w-full px-4 py-3 font-body text-sm placeholder-text-muted" style={{ ...inputStyle, ...(errors.email ? { borderColor: '#ef4444' } : {}) }} />
+                    {errors.email && <p className="text-[#ef4444] text-xs mt-1 font-body">{errors.email}</p>}</div>
 
                   <div><label className="block font-heading text-xs tracking-[0.15em] uppercase text-text-muted mb-2">Service Required <span className="text-primary">*</span></label>
-                    <select name="service" required value={formData.service} onChange={handleChange} className="w-full px-4 py-3 font-body text-sm cursor-pointer focus:border-primary" style={selectStyle}>
+                    <select name="service" value={formData.service} onChange={handleChange} className="form-input-enhanced w-full px-4 py-3 font-body text-sm cursor-pointer" style={{ ...selectStyle, ...(errors.service ? { borderColor: '#ef4444' } : {}) }}>
                       <option value="" disabled style={{ color: '#707070', background: '#1A1A1A' }}>Select a service</option>
                       <optgroup label="Facade & Elevation Works" style={{ background: '#1A1A1A', color: '#F4A103' }}>
                         <option value="Facade Elevation" style={{ background: '#1A1A1A', color: '#fff' }}>Facade Elevation</option>
@@ -116,19 +162,27 @@ function BookingModal({ isOpen, onClose }) {
                         <option value="Outdoor LED" style={{ background: '#1A1A1A', color: '#fff' }}>Outdoor LED Screens</option>
                         <option value="Video Wall" style={{ background: '#1A1A1A', color: '#fff' }}>Video Wall Installations</option>
                       </optgroup>
-                    </select></div>
+                    </select>
+                    {errors.service && <p className="text-[#ef4444] text-xs mt-1 font-body">{errors.service}</p>}</div>
 
                   <div><label className="block font-heading text-xs tracking-[0.15em] uppercase text-text-muted mb-2">Location <span className="text-primary">*</span></label>
-                    <input type="text" name="location" required value={formData.location} onChange={handleChange} placeholder="Your city / project location" className="w-full px-4 py-3 font-body text-sm placeholder-text-muted focus:border-primary" style={inputStyle} /></div>
+                    <input type="text" name="location" value={formData.location} onChange={handleChange} placeholder="Your city / project location" className="form-input-enhanced w-full px-4 py-3 font-body text-sm placeholder-text-muted" style={{ ...inputStyle, ...(errors.location ? { borderColor: '#ef4444' } : {}) }} />
+                    {errors.location && <p className="text-[#ef4444] text-xs mt-1 font-body">{errors.location}</p>}</div>
 
                   <div><label className="block font-heading text-xs tracking-[0.15em] uppercase text-text-muted mb-2">Message <span className="text-text-muted text-[10px]">(optional)</span></label>
-                    <textarea name="message" rows={2} value={formData.message} onChange={handleChange} placeholder="Any additional details about your project" className="w-full px-4 py-3 font-body text-sm placeholder-text-muted focus:border-primary resize-none" style={inputStyle} /></div>
+                    <textarea name="message" rows={2} value={formData.message} onChange={handleChange} placeholder="Any additional details about your project" className="form-input-enhanced w-full px-4 py-3 font-body text-sm placeholder-text-muted resize-none" style={inputStyle} /></div>
+
+                  {/* Submit error message */}
+                  {submitError && (
+                    <div className="py-2 px-4 text-center text-sm font-body" style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)', color: '#ef4444' }}>
+                      {submitError}
+                    </div>
+                  )}
 
                   {/* Confirm button with loading spinner */}
                   <button type="submit" disabled={loading}
-                    className="group relative w-full py-4 font-heading font-bold text-base tracking-[0.15em] uppercase overflow-hidden transition-all duration-500 cursor-pointer mt-1 disabled:opacity-70"
+                    className="btn-gold-primary group relative w-full py-4 font-heading font-bold text-base tracking-[0.15em] uppercase overflow-hidden cursor-pointer mt-1 disabled:opacity-70 disabled:cursor-not-allowed"
                     style={{ background: 'linear-gradient(135deg, #F4A103, #E8930C)', color: '#0B0B0B', boxShadow: '0 4px 20px rgba(244,161,3,0.25)' }}>
-                    <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500" style={{ background: 'linear-gradient(135deg, #FFB92E, #F4A103)' }} />
                     <span className="relative z-10 flex items-center justify-center gap-3">
                       {loading && (
                         <svg className="animate-spin w-5 h-5" viewBox="0 0 24 24" fill="none">
@@ -136,32 +190,25 @@ function BookingModal({ isOpen, onClose }) {
                           <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
                         </svg>
                       )}
-                      {loading ? 'Submitting...' : 'Confirm Booking'}
+                      {loading ? 'SENDING...' : 'Confirm Booking'}
                     </span>
                   </button>
                 </form>
               </>
             ) : (
               /* Success State */
-              <div className="text-center py-8">
-                <div className="mx-auto w-20 h-20 rounded-full flex items-center justify-center mb-6"
-                  style={{ background: 'linear-gradient(145deg, rgba(244,161,3,0.15), rgba(244,161,3,0.05))', border: '2px solid rgba(244,161,3,0.4)' }}>
-                  <svg viewBox="0 0 24 24" fill="none" stroke="#F4A103" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-10 h-10">
-                    <polyline points="20 6 9 17 4 12" />
-                  </svg>
+              <div className="flex flex-col items-center justify-center py-10 text-center">
+                <div className="w-[60px] h-[60px] rounded-full border-2 flex items-center justify-center mb-6" style={{ borderColor: '#D4A017' }}>
+                  <div className="text-[#D4A017] text-3xl mb-1">✓</div>
                 </div>
-                <h3 className="font-heading font-bold text-2xl md:text-3xl text-white mb-3">Thank You!</h3>
-                <p className="font-body text-base text-text-secondary leading-relaxed mb-2">
-                  We appreciate your interest in <span className="text-primary font-semibold">Interface Elevations & Signs</span>.
-                </p>
-                <p className="font-body text-base text-text-secondary leading-relaxed mb-8">
-                  We&apos;ll contact you within <span className="text-primary font-semibold">24 hours</span> to discuss your project requirements.
+                <h3 className="font-heading font-bold text-[24px] text-white mb-3 tracking-wide">Booking Confirmed!</h3>
+                <p className="font-body text-[14px] leading-relaxed mb-8" style={{ color: '#707070' }}>
+                  Our team will contact you within 24 hours.
                 </p>
                 <button onClick={handleClose}
-                  className="group relative px-12 py-3 font-heading font-bold text-sm tracking-[0.15em] uppercase overflow-hidden transition-all duration-500 cursor-pointer"
-                  style={{ border: '1px solid #F4A103', color: '#F4A103', background: 'transparent' }}>
-                  <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-400" style={{ background: 'rgba(244,161,3,0.1)' }} />
-                  <span className="relative z-10">Close</span>
+                  className="btn-outline-gold group relative px-12 py-3 font-heading font-bold text-sm tracking-[0.15em] uppercase overflow-hidden cursor-pointer"
+                  style={{ border: '1px solid #D4A017', color: '#D4A017', background: 'transparent' }}>
+                  <span className="relative z-10">CLOSE</span>
                 </button>
               </div>
             )}
@@ -181,31 +228,46 @@ export default function Contact() {
   const mapRef = useRef(null);
   const lineRef = useRef(null);
   const gridBgRef = useRef(null);
+  const labelRef = useRef(null);
   const [modalOpen, setModalOpen] = useState(false);
 
   useEffect(() => {
     const ctx = gsap.context(() => {
+      // Section heading (#3) — y:60, duration 1s
       gsap.fromTo(headingRef.current,
-        { opacity: 0, y: 40, scale: 0.97 },
-        { opacity: 1, y: 0, scale: 1, duration: 1, ease: 'power4.out',
-          scrollTrigger: { trigger: sectionRef.current, start: 'top 80%', once: true } }
+        { opacity: 0, y: 60 },
+        { opacity: 1, y: 0, duration: 1, ease: 'power4.out',
+          scrollTrigger: { trigger: sectionRef.current, start: 'top 85%', once: true } }
       );
+
+      // Section label — letter-spacing (#3)
+      if (labelRef.current) {
+        gsap.fromTo(labelRef.current,
+          { opacity: 0, letterSpacing: '8px' },
+          { opacity: 1, letterSpacing: '0.25em', duration: 0.6, ease: 'power3.out',
+            scrollTrigger: { trigger: sectionRef.current, start: 'top 85%', once: true } }
+        );
+      }
+
       gsap.fromTo(lineRef.current, { scaleX: 0 },
         { scaleX: 1, duration: 1.2, ease: 'power3.inOut',
-          scrollTrigger: { trigger: sectionRef.current, start: 'top 80%', once: true } }
+          scrollTrigger: { trigger: sectionRef.current, start: 'top 85%', once: true } }
       );
+
+      // Contact cards — left slide-in (#4) with stagger
       cardsRef.current.forEach((card, i) => {
         if (!card) return;
-        gsap.fromTo(card, { opacity: 0, y: 50, scale: 0.95 },
-          { opacity: 1, y: 0, scale: 1, duration: 0.9, delay: 0.15 + i * 0.12, ease: 'power4.out',
-            scrollTrigger: { trigger: sectionRef.current, start: 'top 75%', once: true } });
+        gsap.fromTo(card, { opacity: 0, x: -60 },
+          { opacity: 1, x: 0, duration: 0.9, delay: 0.15 + i * 0.12, ease: 'power4.out',
+            scrollTrigger: { trigger: sectionRef.current, start: 'top 85%', once: true } });
       });
+
       gsap.fromTo(ctaRef.current, { opacity: 0, y: 30 },
         { opacity: 1, y: 0, duration: 0.8, delay: 0.5, ease: 'power3.out',
-          scrollTrigger: { trigger: sectionRef.current, start: 'top 75%', once: true } });
+          scrollTrigger: { trigger: sectionRef.current, start: 'top 85%', once: true } });
       gsap.fromTo(mapRef.current, { opacity: 0, y: 30 },
         { opacity: 1, y: 0, duration: 0.8, delay: 0.7, ease: 'power3.out',
-          scrollTrigger: { trigger: sectionRef.current, start: 'top 60%', once: true } });
+          scrollTrigger: { trigger: sectionRef.current, start: 'top 85%', once: true } });
 
       if (gridBgRef.current) gsap.to(gridBgRef.current, { yPercent: -15, ease: 'none',
         scrollTrigger: { trigger: sectionRef.current, start: 'top bottom', end: 'bottom top', scrub: 0.8 } });
@@ -250,13 +312,16 @@ export default function Contact() {
       <section ref={sectionRef} id="contact" className="relative py-20 md:py-28 overflow-hidden" style={{ backgroundColor: '#0B0B0B' }}>
         <div ref={gridBgRef} className="absolute inset-0 industrial-grid will-change-transform" aria-hidden="true" />
         <div className="vignette" />
-        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
+        {/* Section divider (#29) */}
+        <div className="absolute top-0 left-0 right-0 z-10">
+          <div className="section-divider" />
+        </div>
 
         <div className="relative z-10 max-w-container mx-auto px-6">
           {/* Heading */}
           <div ref={headingRef} className="text-center mb-16 md:mb-20" style={{ opacity: 0 }}>
             <div className="flex items-center justify-center gap-4 mb-6">
-              <div className="w-10 h-[2px] bg-primary" /><span className="text-primary font-heading font-bold text-sm md:text-base tracking-[0.25em] uppercase">Contact Us</span><div className="w-10 h-[2px] bg-primary" />
+              <div className="w-10 h-[2px] bg-primary" /><span ref={labelRef} className="text-primary font-heading font-bold text-sm md:text-base tracking-[0.25em] uppercase" style={{ opacity: 0 }}>Contact Us</span><div className="w-10 h-[2px] bg-primary" />
             </div>
             <h2 className="font-heading font-extrabold text-3xl md:text-4xl lg:text-5xl text-white leading-tight">
               Let&apos;s Build <span className="text-primary">Together</span>
@@ -264,15 +329,15 @@ export default function Contact() {
             <div ref={lineRef} className="mt-6 h-[3px] w-24 mx-auto bg-gradient-to-r from-primary to-primary-light origin-center" style={{ transform: 'scaleX(0)' }} />
           </div>
 
-          {/* Contact cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-10">
+          {/* Contact cards (#21 hover, #4 left slide-in) */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-6">
             {contactInfo.map((info, i) => (
               <div key={info.label} ref={el => cardsRef.current[i] = el}
-                className="group relative text-center p-8 rounded-xl transition-all duration-500"
-                style={{ opacity: 0, background: 'linear-gradient(160deg, #1A1A1A, #131313)', border: '1px solid rgba(244,161,3,0.12)' }}>
-                <div className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
-                  style={{ boxShadow: '0 0 35px rgba(244,161,3,0.1)', border: '1px solid rgba(244,161,3,0.3)' }} />
-                <div className="relative mx-auto w-14 h-14 rounded-xl flex items-center justify-center text-primary mb-5 transition-transform duration-500 group-hover:scale-110"
+                className="contact-info-card group relative text-center p-8 rounded-xl"
+                style={{ opacity: 0, background: 'linear-gradient(160deg, #1A1A1A, #131313)', border: '1px solid rgba(255,255,255,0.05)' }}>
+                <div className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
+                  style={{ boxShadow: '0 0 35px rgba(212,160,23,0.08)', border: '1px solid #D4A017' }} />
+                <div className="contact-icon relative mx-auto w-14 h-14 rounded-xl flex items-center justify-center text-primary mb-5"
                   style={{ background: 'linear-gradient(145deg, rgba(244,161,3,0.12), rgba(244,161,3,0.04))', border: '1px solid rgba(244,161,3,0.2)', boxShadow: '0 4px 15px rgba(244,161,3,0.08)' }}>
                   {info.icon}
                 </div>
@@ -290,11 +355,9 @@ export default function Contact() {
           <div ref={ctaRef} className="mb-10" style={{ opacity: 0 }}>
             <button
               onClick={() => setModalOpen(true)}
-              className="group relative w-full py-5 font-heading font-bold text-lg md:text-xl tracking-[0.2em] uppercase overflow-hidden transition-all duration-500 cursor-pointer"
+              className="btn-gold-primary group relative w-full py-5 font-heading font-bold text-[15px] tracking-[0.2em] uppercase overflow-hidden cursor-pointer"
               style={{ background: 'linear-gradient(135deg, #F4A103, #E8930C)', color: '#0B0B0B', boxShadow: '0 4px 25px rgba(244,161,3,0.3)', borderRadius: 0 }}
             >
-              <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500" style={{ background: 'linear-gradient(135deg, #FFB92E, #F4A103)' }} />
-              <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500" style={{ boxShadow: '0 0 40px rgba(244,161,3,0.4), 0 0 80px rgba(244,161,3,0.15)' }} />
               <span className="relative z-10 flex items-center justify-center gap-3">
                 Book a Free Consultation
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">

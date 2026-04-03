@@ -1,0 +1,362 @@
+/* ===== KEN BURNS HERO BACKGROUND ===== */
+@keyframes kenBurns {
+  0%   { transform: scale(1.0); }
+  100% { transform: scale(1.08); }
+}
+
+.ken-burns-bg {
+  animation: kenBurns 12s ease-in-out infinite alternate;
+  will-change: transform;
+}
+
+/* ===== BUTTON SHIMMER SWEEP ===== */
+.btn-gold-primary {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  will-change: transform;
+}
+
+.btn-gold-primary::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 60%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.25),
+    transparent
+  );
+  transition: none;
+  pointer-events: none;
+}
+
+.btn-gold-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(212, 160, 23, 0.35);
+  filter: brightness(1.08);
+}
+
+.btn-gold-primary:hover::after {
+  left: 100%;
+  transition: left 0.6s ease;
+}
+
+.btn-gold-primary:active {
+  transform: translateY(0px);
+  box-shadow: 0 4px 12px rgba(212, 160, 23, 0.2);
+}
+
+/* ===== SECONDARY OUTLINE BUTTON ===== */
+.btn-outline-gold {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  will-change: transform;
+}
+
+.btn-outline-gold:hover {
+  background-color: #D4A017 !important;
+  color: #000 !important;
+  transform: translateY(-2px);
+}
+
+.btn-outline-gold:active {
+  transform: translateY(0px);
+}
+
+/* ===== SERVICE CARD HOVER ===== */
+.service-card {
+  will-change: transform;
+  transition: transform 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+              box-shadow 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.service-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 0 0 1px #D4A017, 0 16px 40px rgba(212, 160, 23, 0.12);
+}
+
+.service-card:hover .service-icon-box {
+  transform: rotate(5deg) scale(1.1);
+}
+
+.service-card:hover .service-arrow-icon {
+  transform: translateX(4px);
+}
+
+.service-icon-box {
+  transition: transform 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.service-arrow-icon {
+  transition: transform 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* ===== WHY CHOOSE US CARD HOVER ===== */
+.why-card {
+  will-change: transform;
+  transition: transform 0.3s ease, border-color 0.3s ease;
+}
+
+.why-card:hover {
+  transform: translateY(-6px);
+  border-top: 2px solid #D4A017;
+}
+
+.why-card:hover .why-icon {
+  animation: iconBounce 0.3s ease forwards;
+}
+
+@keyframes iconBounce {
+  0%   { transform: translateY(0) scale(1.1); }
+  50%  { transform: translateY(-4px) scale(1.1); }
+  100% { transform: translateY(0) scale(1.1); }
+}
+
+/* ===== CLIENT CARD HOVER ===== */
+.client-card {
+  will-change: transform;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.client-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 0 0 1px rgba(212, 160, 23, 0.6);
+}
+
+.client-card:hover .client-logo-img {
+  transform: scale(1.05);
+}
+
+.client-logo-img {
+  transition: transform 0.3s ease;
+}
+
+/* ===== CONTACT CARD HOVER ===== */
+.contact-info-card {
+  will-change: transform;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.contact-info-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 0 0 1px #D4A017, 0 0 35px rgba(212, 160, 23, 0.08);
+}
+
+.contact-info-card:hover .contact-icon {
+  transform: scale(1.1);
+}
+
+.contact-icon {
+  transition: transform 0.3s ease;
+}
+
+/* ===== PROJECT CARD HOVER ===== */
+.project-card {
+  will-change: transform;
+  transition: transform 0.4s ease;
+}
+
+.project-card:hover {
+  transform: translateY(-6px);
+}
+
+.project-card:hover .project-image {
+  transform: scale(1.06);
+}
+
+.project-image {
+  transition: transform 0.5s ease;
+}
+
+.project-card:hover .project-tag {
+  animation: tagPulse 0.6s ease infinite alternate;
+}
+
+@keyframes tagPulse {
+  0%   { transform: scale(1); }
+  100% { transform: scale(1.05); }
+}
+
+/* ===== FORM INPUT FOCUS ===== */
+.form-input-enhanced {
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.form-input-enhanced:focus {
+  border-color: #D4A017 !important;
+  box-shadow: 0 0 0 3px rgba(212, 160, 23, 0.15);
+  outline: none;
+}
+
+/* ===== FLOATING LABEL ===== */
+.floating-label-group {
+  position: relative;
+}
+
+.floating-label-group label {
+  transition: all 0.3s ease;
+}
+
+/* ===== SECTION DIVIDER ===== */
+.section-divider {
+  width: 80%;
+  height: 1px;
+  margin: 0 auto;
+  background: linear-gradient(to right, transparent, #D4A017, transparent);
+  pointer-events: none;
+}
+
+/* ===== MARQUEE STRIP ===== */
+@keyframes marqueeScroll {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+.marquee-strip {
+  overflow: hidden;
+  position: relative;
+  width: 100%;
+}
+
+.marquee-track {
+  display: flex;
+  gap: 1.5rem;
+  width: max-content;
+  animation: marqueeScroll 30s linear infinite;
+}
+
+.marquee-strip:hover .marquee-track {
+  animation-play-state: paused;
+}
+
+/* ===== CURSOR TRAILER ===== */
+.cursor-dot {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 8px;
+  height: 8px;
+  background: #D4A017;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9998;
+  transition: width 0.15s ease, height 0.15s ease, background 0.15s ease;
+  transform: translate(-50%, -50%);
+}
+
+.cursor-ring {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 30px;
+  height: 30px;
+  border: 1.5px solid rgba(212, 160, 23, 0.6);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9997;
+  transition: width 0.2s ease, height 0.2s ease, border-color 0.2s ease;
+  transform: translate(-50%, -50%);
+}
+
+.cursor-ring.expanded {
+  width: 50px;
+  height: 50px;
+}
+
+.cursor-ring.clicked {
+  width: 20px;
+  height: 20px;
+}
+
+/* Hide cursor on touch devices */
+@media (hover: none) and (pointer: coarse) {
+  .cursor-dot,
+  .cursor-ring {
+    display: none !important;
+  }
+}
+
+/* Respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .cursor-dot,
+  .cursor-ring {
+    display: none !important;
+  }
+
+  .ken-burns-bg {
+    animation: none;
+  }
+
+  .marquee-track {
+    animation: none;
+  }
+}
+
+/* ===== BACK TO TOP BUTTON ===== */
+.back-to-top {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(212, 160, 23, 0.9);
+  color: #0B0B0B;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 90;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+  pointer-events: none;
+  box-shadow: 0 4px 12px rgba(212, 160, 23, 0.2);
+}
+
+.back-to-top.visible {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.back-to-top:hover {
+  transform: scale(1.1);
+  box-shadow: 0 0 20px rgba(212, 160, 23, 0.4);
+}
+
+/* ===== NAV LINK UNDERLINE EFFECT ===== */
+.nav-link-animated {
+  position: relative;
+}
+
+.nav-link-animated::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: #D4A017;
+  transition: width 0.3s ease;
+}
+
+.nav-link-animated:hover::after,
+.nav-link-animated.nav-active::after {
+  width: 100%;
+}
+
+/* ===== NAVBAR LOGO HOVER ===== */
+.nav-logo-hover {
+  transition: transform 0.3s ease;
+}
+
+.nav-logo-hover:hover {
+  transform: scale(1.05);
+}

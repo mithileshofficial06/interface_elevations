@@ -89,10 +89,10 @@ function ServiceCard({ service, index, sectionRef }) {
     if (!cardRef.current) return;
     const ctx = gsap.context(() => {
       gsap.fromTo(cardRef.current,
-        { opacity: 0, y: 60, scale: 0.95 },
+        { opacity: 0, y: 40 },
         {
-          opacity: 1, y: 0, scale: 1, duration: 0.8, delay: index * 0.15, ease: 'power3.out',
-          scrollTrigger: { trigger: sectionRef.current, start: 'top 75%', once: true },
+          opacity: 1, y: 0, duration: 0.8, delay: index * 0.15, ease: 'power3.out',
+          scrollTrigger: { trigger: sectionRef.current, start: 'top 85%', once: true },
         }
       );
     }, cardRef);
@@ -111,7 +111,7 @@ function ServiceCard({ service, index, sectionRef }) {
   return (
     <div
       ref={cardRef}
-      className="group relative rounded-2xl overflow-hidden transition-all duration-500"
+      className="service-card group relative rounded-[4px] overflow-hidden"
       style={{
         opacity: 0,
         background: 'linear-gradient(160deg, #1A1A1A 0%, #131313 100%)',
@@ -129,9 +129,9 @@ function ServiceCard({ service, index, sectionRef }) {
 
       {/* hover glow border */}
       <div
-        className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
+        className="absolute inset-0 rounded-[4px] opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
         style={{
-          boxShadow: '0 0 40px rgba(244,161,3,0.08), inset 0 0 40px rgba(244,161,3,0.03)',
+          boxShadow: '0 0 0 1px #D4A017, 0 16px 40px rgba(212,160,23,0.12)',
           border: '1px solid rgba(244,161,3,0.4)',
         }}
       />
@@ -140,7 +140,7 @@ function ServiceCard({ service, index, sectionRef }) {
         {/* Header */}
         <div className="flex items-start gap-4 mb-4">
           <div
-            className="flex-shrink-0 w-14 h-14 rounded-xl flex items-center justify-center text-primary transition-transform duration-500 group-hover:scale-110"
+            className="service-icon-box flex-shrink-0 w-14 h-14 rounded-xl flex items-center justify-center text-primary"
             style={{
               background: 'linear-gradient(145deg, rgba(244,161,3,0.12), rgba(244,161,3,0.04))',
               border: '1px solid rgba(244,161,3,0.2)',
@@ -186,7 +186,7 @@ function ServiceCard({ service, index, sectionRef }) {
           </div>
         </div>
 
-        {/* Explore button — gold arrow */}
+        {/* Explore button — gold arrow (#13 arrow slide) */}
         <button
           onClick={() => setExpanded(!expanded)}
           className="mt-4 flex items-center gap-2 px-4 py-2 rounded-sm font-heading font-semibold text-xs tracking-[0.1em] uppercase transition-all duration-300 cursor-pointer group/btn"
@@ -199,10 +199,11 @@ function ServiceCard({ service, index, sectionRef }) {
           <span>{expanded ? 'Collapse' : 'Explore Services'}</span>
           <svg
             viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
-            className="w-4 h-4 transition-transform duration-300"
-            style={{ transform: expanded ? 'rotate(180deg)' : 'rotate(0deg)' }}
+            className="service-arrow-icon w-4 h-4"
+            style={{ transform: expanded ? 'rotate(90deg)' : 'rotate(0deg)', transition: 'transform 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94)' }}
           >
-            <polyline points="6 9 12 15 18 9" />
+            <line x1="5" y1="12" x2="19" y2="12" />
+            <polyline points="12 5 19 12 12 19" />
           </svg>
         </button>
       </div>
@@ -218,18 +219,30 @@ export default function Services() {
   const gridBgRef = useRef(null);
   const glow1Ref = useRef(null);
   const glow2Ref = useRef(null);
+  const labelRef = useRef(null);
 
   useEffect(() => {
     const ctx = gsap.context(() => {
+      // Section heading (#3) — y:60, duration:1s, power4.out
       gsap.fromTo(headingRef.current,
-        { opacity: 0, y: 40, scale: 0.97 },
-        { opacity: 1, y: 0, scale: 1, duration: 1, ease: 'power4.out',
-          scrollTrigger: { trigger: sectionRef.current, start: 'top 80%', once: true } }
+        { opacity: 0, y: 60 },
+        { opacity: 1, y: 0, duration: 1, ease: 'power4.out',
+          scrollTrigger: { trigger: sectionRef.current, start: 'top 85%', once: true } }
       );
+
+      // Section label (#3) — letter-spacing expanding
+      if (labelRef.current) {
+        gsap.fromTo(labelRef.current,
+          { opacity: 0, letterSpacing: '8px' },
+          { opacity: 1, letterSpacing: '0.25em', duration: 0.6, ease: 'power3.out',
+            scrollTrigger: { trigger: sectionRef.current, start: 'top 85%', once: true } }
+        );
+      }
+
       gsap.fromTo(lineRef.current,
         { scaleX: 0 },
         { scaleX: 1, duration: 1.2, ease: 'power3.inOut',
-          scrollTrigger: { trigger: sectionRef.current, start: 'top 80%', once: true } }
+          scrollTrigger: { trigger: sectionRef.current, start: 'top 85%', once: true } }
       );
 
       /* Parallax */
@@ -247,15 +260,18 @@ export default function Services() {
     <section ref={sectionRef} id="services" className="relative py-20 md:py-28 overflow-hidden" style={{ backgroundColor: '#0B0B0B' }}>
       <div ref={gridBgRef} className="absolute inset-0 industrial-grid will-change-transform" aria-hidden="true" />
       <div className="vignette" />
-      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
+      {/* Section divider (#29) */}
+      <div className="absolute top-0 left-0 right-0 z-10">
+        <div className="section-divider" />
+      </div>
       <div ref={glow1Ref} className="absolute pointer-events-none will-change-transform" style={{ left: '-5%', top: '15%', width: '450px', height: '450px', background: 'radial-gradient(circle, rgba(244,161,3,0.04) 0%, transparent 70%)' }} />
       <div ref={glow2Ref} className="absolute pointer-events-none will-change-transform" style={{ right: '-8%', bottom: '10%', width: '500px', height: '500px', background: 'radial-gradient(circle, rgba(244,161,3,0.03) 0%, transparent 70%)' }} />
 
       <div className="relative z-10 max-w-container mx-auto px-6">
-        <div ref={headingRef} className="mb-14 md:mb-18" style={{ opacity: 0 }}>
+        <div ref={headingRef} className="mb-10" style={{ opacity: 0 }}>
           <div className="flex items-center gap-4 mb-6">
             <div className="w-10 h-[2px] bg-primary" />
-            <span className="text-primary font-heading font-bold text-sm md:text-base tracking-[0.25em] uppercase">Our Services</span>
+            <span ref={labelRef} className="text-primary font-heading font-bold text-sm md:text-base tracking-[0.25em] uppercase" style={{ opacity: 0 }}>Our Services</span>
           </div>
           <h2 className="font-heading font-extrabold text-3xl md:text-4xl lg:text-5xl text-white leading-tight">
             End-to-End <span className="text-primary">Solutions</span>{' '}

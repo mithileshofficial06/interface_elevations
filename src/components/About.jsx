@@ -13,32 +13,47 @@ export default function About() {
   const textRef = useRef(null);
   const imageWrapRef = useRef(null);
   const textItemRefs = useRef([]);
+  const labelRef = useRef(null);
 
   useEffect(() => {
     const ctx = gsap.context(() => {
+      // Section label — letter-spacing animation (#3)
+      if (labelRef.current) {
+        gsap.fromTo(labelRef.current,
+          { opacity: 0, letterSpacing: '8px' },
+          {
+            opacity: 1, letterSpacing: '0.2em', duration: 0.6, ease: 'power3.out',
+            scrollTrigger: { trigger: sectionRef.current, start: 'top 85%', once: true },
+          }
+        );
+      }
+
+      // Image — LEFT slide-in (#4)
       gsap.fromTo(imageRef.current,
-        { opacity: 0, x: -80, scale: 0.95 },
+        { opacity: 0, x: -60, scale: 0.95 },
         {
           opacity: 1, x: 0, scale: 1, duration: 1.2, ease: 'power4.out',
-          scrollTrigger: { trigger: sectionRef.current, start: 'top 75%', once: true },
+          scrollTrigger: { trigger: sectionRef.current, start: 'top 85%', once: true },
         }
       );
 
+      // Text — RIGHT slide-in (#5)
       gsap.fromTo(textRef.current,
-        { opacity: 0, x: 80 },
+        { opacity: 0, x: 60 },
         {
           opacity: 1, x: 0, duration: 1.2, delay: 0.15, ease: 'power4.out',
-          scrollTrigger: { trigger: sectionRef.current, start: 'top 75%', once: true },
+          scrollTrigger: { trigger: sectionRef.current, start: 'top 85%', once: true },
         }
       );
 
+      // Text children — stagger (#2)
       textItemRefs.current.forEach((el, i) => {
         if (!el) return;
         gsap.fromTo(el,
-          { opacity: 0, y: 30 },
+          { opacity: 0, y: 40 },
           {
-            opacity: 1, y: 0, duration: 0.8, delay: 0.3 + i * 0.15, ease: 'power3.out',
-            scrollTrigger: { trigger: sectionRef.current, start: 'top 70%', once: true },
+            opacity: 1, y: 0, duration: 0.8, delay: 0.3 + i * 0.12, ease: 'power3.out',
+            scrollTrigger: { trigger: sectionRef.current, start: 'top 85%', once: true },
           }
         );
       });
@@ -62,31 +77,37 @@ export default function About() {
     <section
       ref={sectionRef}
       id="about"
-      className="relative py-20 md:py-28 overflow-hidden"
+      className="relative py-16 md:py-20 overflow-hidden"
       style={{ backgroundColor: '#111111' }}
     >
-      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
+      {/* Section divider (#29) */}
+      <div className="absolute top-0 left-0 right-0 z-10">
+        <div className="section-divider" />
+      </div>
 
       <div className="max-w-container mx-auto px-6">
         {/* Section label */}
         <div className="flex items-center gap-4 mb-12">
           <div className="w-10 h-[2px] bg-primary" />
-          <h2 className="text-primary font-heading font-bold text-xl md:text-2xl tracking-[0.2em] uppercase">
+          <h2
+            ref={labelRef}
+            className="text-primary font-heading font-bold text-xl md:text-2xl tracking-[0.2em] uppercase"
+            style={{ opacity: 0 }}
+          >
             About Us
           </h2>
         </div>
 
         {/* Content grid — image 50%, text 50% */}
         <div className="grid grid-cols-1 md:grid-cols-12 gap-10 md:gap-16 items-center">
-          {/* Founder Image — wider 6-col */}
+          {/* Founder Image — wider 6-col (#4 left slide-in) */}
           <div ref={imageRef} className="md:col-span-6 flex flex-col items-start will-change-transform" style={{ opacity: 0 }}>
-            <div ref={imageWrapRef} className="relative border border-primary/40 p-2 rounded-sm w-full will-change-transform">
+            <div ref={imageWrapRef} className="relative border border-primary/40 p-2 rounded-sm w-full will-change-transform aspect-[3/4]">
               <Image
                 src="/images/profile/download.jpeg"
                 alt="M. P. Ganeshan - Founder"
-                width={1400}
-                height={1500}
-                className="w-full h-auto object-cover rounded-sm"
+                fill
+                className="object-cover rounded-sm"
               />
               <div className="absolute top-0 left-0 w-6 h-6 border-t-2 border-l-2 border-primary" />
               <div className="absolute top-0 right-0 w-6 h-6 border-t-2 border-r-2 border-primary" />
@@ -95,7 +116,7 @@ export default function About() {
             </div>
           </div>
 
-          {/* About Text — 6-col */}
+          {/* About Text — 6-col (#5 right slide-in) */}
           <div ref={textRef} className="md:col-span-6 will-change-transform" style={{ opacity: 0 }}>
             <h2
               ref={el => textItemRefs.current[0] = el}
@@ -109,8 +130,8 @@ export default function About() {
             {/* Gold accent underline */}
             <div
               ref={el => textItemRefs.current[1] = el}
-              className="w-20 h-[3px] bg-gradient-to-r from-primary to-primary-light mb-8"
-              style={{ opacity: 0 }}
+              className="mb-3"
+              style={{ width: '60px', height: '3px', backgroundColor: '#D4A017', opacity: 0 }}
             />
 
             <p

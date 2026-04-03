@@ -3,6 +3,9 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import Image from 'next/image';
 import gsap from 'gsap';
+import { ScrollToPlugin } from 'gsap/ScrollToPlugin';
+
+gsap.registerPlugin(ScrollToPlugin);
 
 const NAV_LINKS = [
   { label: 'Home', href: '#hero' },
@@ -25,8 +28,17 @@ export default function IntroAnimation({ children }) {
   const contentRef = useRef(null);
   const [activeIndex, setActiveIndex] = useState(0);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [scrollProgress, setScrollProgress] = useState(0);
+  const [showBackToTop, setShowBackToTop] = useState(false);
   const mobileMenuRef = useRef(null);
   const mobileLinksRef = useRef([]);
+
+  /* ── Cursor trailer refs ── */
+  const cursorDotRef = useRef(null);
+  const cursorRingRef = useRef(null);
+  const mousePos = useRef({ x: -100, y: -100 });
+  const dotPos = useRef({ x: -100, y: -100 });
+  const ringPos = useRef({ x: -100, y: -100 });
 
   const moveHighlight = useCallback((index) => {
     if (!navLinksRef.current || !highlightRef.current) return;
@@ -58,6 +70,18 @@ export default function IntroAnimation({ children }) {
   const handleNavLeave = useCallback(() => {
     moveHighlight(activeIndex);
   }, [activeIndex, moveHighlight]);
+
+  /* ── GSAP smooth anchor scrolling ── */
+  const scrollToTarget = useCallback((href) => {
+    const target = document.querySelector(href);
+    if (target) {
+      gsap.to(window, {
+        duration: 1,
+        scrollTo: { y: target, offsetY: 80 },
+        ease: 'power3.inOut',
+      });
+    }
+  }, []);
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -236,18 +260,40 @@ export default function IntroAnimation({ children }) {
     };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Track active section on scroll and update navbar highlight
+  /* ── Navbar scroll behavior (#8) + active section tracking + scroll progress + back-to-top ── */
   useEffect(() => {
     const sectionIds = NAV_LINKS.map((l) => l.href.replace('#', ''));
+    let lastScrollTime = 0;
 
     const onScroll = () => {
-      if (!transitionFired.current) return;
-      const scrollY = window.scrollY + 120; // offset for navbar height
+      const now = Date.now();
+      if (now - lastScrollTime < 16) return; // 16ms throttle
+      lastScrollTime = now;
 
+      if (!transitionFired.current) return;
+      const scrollY = window.scrollY;
+
+      // Navbar background transition
+      if (navbarRef.current) {
+        if (scrollY > 80) {
+          navbarRef.current.style.background = 'rgba(10,10,10,0.95)';
+          navbarRef.current.style.backdropFilter = 'blur(12px)';
+          navbarRef.current.style.WebkitBackdropFilter = 'blur(12px)';
+          navbarRef.current.style.boxShadow = '0 2px 20px rgba(0,0,0,0.4)';
+        } else {
+          navbarRef.current.style.background = 'transparent';
+          navbarRef.current.style.backdropFilter = 'blur(0px)';
+          navbarRef.current.style.WebkitBackdropFilter = 'blur(0px)';
+          navbarRef.current.style.boxShadow = 'none';
+        }
+      }
+
+      // Active section tracking
+      const offsetY = scrollY + 120;
       let currentIndex = 0;
       sectionIds.forEach((id, i) => {
         const el = document.getElementById(id);
-        if (el && el.offsetTop <= scrollY) {
+        if (el && el.offsetTop <= offsetY) {
           currentIndex = i;
         }
       });
@@ -256,22 +302,142 @@ export default function IntroAnimation({ children }) {
         setActiveIndex(currentIndex);
         moveHighlight(currentIndex);
       }
+
+      // Scroll progress percentage
+      const totalHeight = document.body.scrollHeight - window.innerHeight;
+      const progress = totalHeight > 0 ? (scrollY / totalHeight) * 100 : 0;
+      setScrollProgress(progress);
+
+      // Back to top visibility
+      setShowBackToTop(scrollY > 400);
     };
 
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
   }, [activeIndex, moveHighlight]);
 
+  /* ── Cursor trailer (#25) ── */
+  useEffect(() => {
+    // Skip on touch devices
+    const isTouchDevice = window.matchMedia('(hover: none) and (pointer: coarse)').matches;
+    if (isTouchDevice) return;
+
+    const dot = cursorDotRef.current;
+    const ring = cursorRingRef.current;
+    if (!dot || !ring) return;
+
+    const onMouseMove = (e) => {
+      mousePos.current = { x: e.clientX, y: e.clientY };
+    };
+
+    const onMouseDown = () => {
+      ring.classList.add('clicked');
+      ring.classList.remove('expanded');
+    };
+
+    const onMouseUp = () => {
+      ring.classList.remove('clicked');
+    };
+
+    const onMouseEnterInteractive = () => {
+      ring.classList.add('expanded');
+    };
+
+    const onMouseLeaveInteractive = () => {
+      ring.classList.remove('expanded');
+    };
+
+    // Track interactive elements for ring expansion
+    const addInteractiveListeners = () => {
+      const interactiveEls = document.querySelectorAll('button, a, .group, [role="button"]');
+      interactiveEls.forEach((el) => {
+        el.addEventListener('mouseenter', onMouseEnterInteractive);
+        el.addEventListener('mouseleave', onMouseLeaveInteractive);
+      });
+      return interactiveEls;
+    };
+
+    let interactiveEls = addInteractiveListeners();
+
+    // Re-register on DOM changes (debounced)
+    let mutationTimeout;
+    const observer = new MutationObserver(() => {
+      clearTimeout(mutationTimeout);
+      mutationTimeout = setTimeout(() => {
+        interactiveEls.forEach((el) => {
+          el.removeEventListener('mouseenter', onMouseEnterInteractive);
+          el.removeEventListener('mouseleave', onMouseLeaveInteractive);
+        });
+        interactiveEls = addInteractiveListeners();
+      }, 300);
+    });
+    observer.observe(document.body, { childList: true, subtree: true });
+
+    window.addEventListener('mousemove', onMouseMove, { passive: true });
+    window.addEventListener('mousedown', onMouseDown);
+    window.addEventListener('mouseup', onMouseUp);
+
+    // Animation loop
+    let animId;
+    const animate = () => {
+      // Dot follows closely (0.1s lag)
+      dotPos.current.x += (mousePos.current.x - dotPos.current.x) * 0.15;
+      dotPos.current.y += (mousePos.current.y - dotPos.current.y) * 0.15;
+      dot.style.left = dotPos.current.x + 'px';
+      dot.style.top = dotPos.current.y + 'px';
+
+      // Ring follows with more lag (0.2s lag)
+      ringPos.current.x += (mousePos.current.x - ringPos.current.x) * 0.08;
+      ringPos.current.y += (mousePos.current.y - ringPos.current.y) * 0.08;
+      ring.style.left = ringPos.current.x + 'px';
+      ring.style.top = ringPos.current.y + 'px';
+
+      animId = requestAnimationFrame(animate);
+    };
+    animId = requestAnimationFrame(animate);
+
+    return () => {
+      cancelAnimationFrame(animId);
+      window.removeEventListener('mousemove', onMouseMove);
+      window.removeEventListener('mousedown', onMouseDown);
+      window.removeEventListener('mouseup', onMouseUp);
+      observer.disconnect();
+      clearTimeout(mutationTimeout);
+      interactiveEls.forEach((el) => {
+        el.removeEventListener('mouseenter', onMouseEnterInteractive);
+        el.removeEventListener('mouseleave', onMouseLeaveInteractive);
+      });
+    };
+  }, []);
+
+  const handleBackToTop = () => {
+    gsap.to(window, {
+      duration: 1,
+      scrollTo: { y: 0 },
+      ease: 'power3.inOut',
+    });
+  };
+
   return (
     <div ref={wrapperRef} className="relative">
+      {/* CURSOR TRAILER */}
+      <div ref={cursorDotRef} className="cursor-dot" />
+      <div ref={cursorRingRef} className="cursor-ring" />
+
+      {/* SCROLL PROGRESS BAR */}
+      <div 
+        className="fixed top-0 left-0 h-[3px] bg-primary z-[9999]"
+        style={{ width: `${scrollProgress}%`, transition: 'width 0.05s linear' }}
+      />
+
       {/* FIXED NAVBAR (hidden initially) */}
       <nav
         ref={navbarRef}
-        className="fixed top-0 left-0 right-0 z-[100] bg-background/90 backdrop-blur-md border-b border-white/5"
-        style={{ opacity: 0, visibility: 'hidden' }}
+        className="fixed top-0 left-0 right-0 z-[100] border-b border-white/5"
+        style={{ opacity: 0, visibility: 'hidden', transition: 'background 0.4s ease, backdrop-filter 0.4s ease, box-shadow 0.4s ease' }}
       >
         <div className="max-w-container mx-auto flex items-center justify-between px-6 py-3">
-          <div ref={navbarLogoRef} className="flex items-center">
+          <div ref={navbarLogoRef} className="flex items-center nav-logo-hover">
             <Image
               src="/images/logo/logo-main.png"
               alt="Interface Elevation & Signs"
@@ -298,11 +464,15 @@ export default function IntroAnimation({ children }) {
                 key={link.label}
                 href={link.href}
                 data-nav-link
-                onClick={() => handleNavClick(i)}
+                onClick={(e) => {
+                  e.preventDefault();
+                  scrollToTarget(link.href);
+                  handleNavClick(i);
+                }}
                 onMouseEnter={() => handleNavHover(i)}
-                className={`relative z-10 px-5 py-2 text-sm font-medium tracking-wider uppercase transition-colors duration-300 rounded ${
+                className={`nav-link-animated relative z-10 px-5 py-2 text-sm font-medium tracking-wider uppercase transition-colors duration-300 rounded ${
                   activeIndex === i
-                    ? 'text-primary'
+                    ? 'text-primary nav-active'
                     : 'text-text-secondary hover:text-white'
                 }`}
               >
@@ -365,14 +535,19 @@ export default function IntroAnimation({ children }) {
                 key={link.label}
                 ref={el => mobileLinksRef.current[i] = el}
                 href={link.href}
-                onClick={() => {
+                onClick={(e) => {
+                  e.preventDefault();
                   gsap.to(mobileMenuRef.current, {
                     opacity: 0, duration: 0.25, ease: 'power2.in',
-                    onComplete: () => { setMobileOpen(false); document.body.style.overflow = ''; },
+                    onComplete: () => {
+                      setMobileOpen(false);
+                      document.body.style.overflow = '';
+                      scrollToTarget(link.href);
+                    },
                   });
                   handleNavClick(i);
                 }}
-                className="font-heading font-bold text-3xl md:text-4xl tracking-[0.2em] uppercase text-primary hover:text-white transition-colors duration-300"
+                className="font-heading font-bold text-[32px] uppercase text-primary hover:text-white transition-colors duration-300"
                 style={{ opacity: 0 }}
               >
                 {link.label}
@@ -438,6 +613,18 @@ export default function IntroAnimation({ children }) {
       <div ref={contentRef} className="relative" style={{ opacity: 0 }}>
         {children}
       </div>
+
+      {/* BACK TO TOP BUTTON */}
+      <button
+        className={`back-to-top ${showBackToTop ? 'visible' : ''}`}
+        onClick={handleBackToTop}
+        aria-label="Back to top"
+      >
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
+          <line x1="12" y1="19" x2="12" y2="5" />
+          <polyline points="5 12 12 5 19 12" />
+        </svg>
+      </button>
     </div>
   );
 }
