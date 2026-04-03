@@ -30,8 +30,11 @@ export default function Footer() {
               height={50}
               className="h-10 md:h-12 w-auto object-contain mb-4"
             />
-            <p className="font-body text-sm text-text-secondary leading-relaxed max-w-xs mb-4">
+            <p className="font-body text-sm text-text-secondary leading-relaxed max-w-xs mb-1">
               Elevating Structures Since 1998
+            </p>
+            <p className="font-heading font-bold text-sm tracking-[0.2em] uppercase text-primary mb-4">
+              Cover to ever
             </p>
             <p className="font-body text-xs text-text-muted max-w-xs">
               © 2025 Interface Elevation & Signs. All Rights Reserved.

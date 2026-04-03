@@ -326,6 +326,9 @@ export default function Contact() {
             <h2 className="font-heading font-extrabold text-3xl md:text-4xl lg:text-5xl text-white leading-tight">
               Let&apos;s Build <span className="text-primary">Together</span>
             </h2>
+            <p className="mt-5 font-heading text-sm md:text-base tracking-[0.2em] uppercase text-text-secondary" style={{ opacity: 0.9 }}>
+              Serviceable <span className="text-primary font-bold">PAN INDIA</span>
+            </p>
             <div ref={lineRef} className="mt-6 h-[3px] w-24 mx-auto bg-gradient-to-r from-primary to-primary-light origin-center" style={{ transform: 'scaleX(0)' }} />
           </div>
 

@@ -56,40 +56,7 @@ const BrandCard = forwardRef(function BrandCard({ src }, ref) {
   );
 });
 
-/* ─── Marquee Logo Strip (#20) ─── */
-function MarqueeStrip() {
-  const doubled = [...BRANDS, ...BRANDS];
 
-  return (
-    <div className="marquee-strip mt-8">
-      <div className="marquee-track">
-        {doubled.map((src, i) => {
-          const encoded = src.split('/').map(s => encodeURIComponent(s)).join('/');
-          return (
-            <div
-              key={`marquee-${i}`}
-              className="flex-shrink-0 relative flex items-center justify-center"
-              style={{
-                width: '140px',
-                height: '70px',
-                border: '1px solid rgba(244,161,3,0.15)',
-                borderRadius: '8px',
-                background: '#fff',
-              }}
-            >
-              <Image
-                src={encoded}
-                alt="Client logo"
-                fill
-                className="object-contain p-2"
-              />
-            </div>
-          );
-        })}
-      </div>
-    </div>
-  );
-}
 
 export default function Clients() {
   const sectionRef = useRef(null);
@@ -181,8 +148,7 @@ export default function Clients() {
           </div>
         </div>
 
-        {/* Auto-scrolling marquee strip (#20) — ADDITIONAL to the grid */}
-        <MarqueeStrip />
+
       </div>
     </section>
   );

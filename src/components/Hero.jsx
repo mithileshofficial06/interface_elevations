@@ -218,43 +218,44 @@ export default function Hero() {
       return () => ctx.revert();
     }, 300);
 
-    /* ── STATS COUNTER (#27) ── */
-    const counterObserver = new IntersectionObserver(
-      (entries, observer) => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting) {
-            const el = entry.target;
-            const targetVal = parseFloat(el.getAttribute('data-target'));
-            let startTime = null;
-            const duration = 2000;
-            const easeOut = t => 1 - Math.pow(1 - t, 3);
+    /* ── STATS COUNTER (#27) — ScrollTrigger based ── */
+    const runCounter = (el) => {
+      const targetVal = parseFloat(el.getAttribute('data-target'));
+      const prefix = el.getAttribute('data-prefix') || '';
+      let startTime = null;
+      const duration = 2000;
+      const easeOut = t => 1 - Math.pow(1 - t, 3);
 
-            const step = (timestamp) => {
-              if (!startTime) startTime = timestamp;
-              const progress = Math.min((timestamp - startTime) / duration, 1);
-              const currentVal = Math.round(easeOut(progress) * targetVal);
-              el.textContent = currentVal;
-              if (progress < 1) {
-                window.requestAnimationFrame(step);
-              } else {
-                el.textContent = (el.getAttribute('data-prefix') || '') + targetVal;
-              }
-            };
-            window.requestAnimationFrame(step);
-            observer.unobserve(el);
-          }
-        });
-      },
-      { threshold: 0.5 }
-    );
+      const step = (timestamp) => {
+        if (!startTime) startTime = timestamp;
+        const progress = Math.min((timestamp - startTime) / duration, 1);
+        const currentVal = Math.round(easeOut(progress) * targetVal);
+        el.textContent = currentVal;
+        if (progress < 1) {
+          window.requestAnimationFrame(step);
+        } else {
+          el.textContent = prefix + targetVal;
+        }
+      };
+      window.requestAnimationFrame(step);
+    };
 
+    // Use ScrollTrigger to fire counters when stats scroll into view
+    const counterTriggers = [];
     numberRefs.current.forEach(el => {
-      if (el) counterObserver.observe(el);
+      if (!el) return;
+      const trigger = ScrollTrigger.create({
+        trigger: el,
+        start: 'top 90%',
+        once: true,
+        onEnter: () => runCounter(el),
+      });
+      counterTriggers.push(trigger);
     });
 
     return () => {
       clearTimeout(timer);
-      counterObserver.disconnect();
+      counterTriggers.forEach(t => t.kill());
     };
   }, []);
 
@@ -320,7 +321,7 @@ export default function Hero() {
             {/* Section label with letter-spacing animation */}
             <div ref={labelRef} style={{ opacity: 0 }}>
               <span className="text-primary font-heading font-bold text-xs tracking-[0.25em] uppercase mb-2 inline-block">
-                Premium Building Solutions
+                Cover to Ever
               </span>
             </div>
 
@@ -341,7 +342,7 @@ export default function Hero() {
               className="mt-4 md:mt-5 font-heading font-medium text-sm sm:text-base md:text-lg tracking-[0.15em] uppercase"
               style={{ color: '#D4A017', opacity: 0 }}
             >
-              Chennai&apos;s Premier Facade &amp; Signage Experts Since 1998
+              Pan-India Facade &amp; Signage Experts Since 1998
             </p>
 
             <p
