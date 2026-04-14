@@ -635,7 +635,7 @@ export default function IntroAnimation({ children }) {
 
       {/* FLOATING WHATSAPP BUTTON (Desktop) */}
       <a
-        href="https://wa.me/916380409380"
+        href="https://wa.me/919003296999"
         target="_blank"
         rel="noopener noreferrer"
         className="fixed bottom-8 right-8 z-[90] hidden md:flex items-center justify-center w-14 h-14 rounded-full shadow-lg group transition-all duration-500"
@@ -665,7 +665,7 @@ export default function IntroAnimation({ children }) {
         }}
       >
         <a
-          href="tel:+916380409380"
+          href="tel:+919003296999"
           className="flex-1 flex items-center justify-center gap-2 py-3.5 text-white font-heading font-bold text-sm tracking-wide"
           style={{ backgroundColor: '#1A1A1A', borderTop: '1px solid rgba(244,161,3,0.3)' }}
         >
@@ -675,7 +675,7 @@ export default function IntroAnimation({ children }) {
           Call Now
         </a>
         <a
-          href="https://wa.me/916380409380"
+          href="https://wa.me/919003296999"
           target="_blank"
           rel="noopener noreferrer"
           className="flex-1 flex items-center justify-center gap-2 py-3.5 text-white font-heading font-bold text-sm tracking-wide"
